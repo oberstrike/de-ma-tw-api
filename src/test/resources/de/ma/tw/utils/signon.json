@@ -1,0 +1,104 @@
+{
+  "result": {
+    "status": 1,
+    "type": "password",
+    "player_id": 1576139317,
+    "fields": [],
+    "master_session": {
+      "player_id": 1576139317,
+      "token": "d85f7be0ad51:307efa4e38b5e70077819a5a565ef20b5a15609d37b7e3d660e75bcd8ba149ec",
+      "name": "oberstriker",
+      "locale": "de_DE",
+      "guest": false,
+      "worlds": {
+        "active": [
+          {
+            "server_name": "dec1",
+            "name": "HP15",
+            "rank": "401",
+            "url": "https:\\/\\/dec1.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": false,
+            "active": "1"
+          },
+          {
+            "server_name": "de211",
+            "name": "Welt 211",
+            "rank": "465",
+            "url": "https:\\/\\/de211.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": true,
+            "active": "1"
+          }
+        ],
+        "suggested": [],
+        "other": [
+          {
+            "server_name": "de210",
+            "name": "Welt 210",
+            "rank": "464",
+            "url": "https:\\/\\/de210.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": false,
+            "active": "0"
+          },
+          {
+            "server_name": "de209",
+            "name": "Welt 209",
+            "rank": "463",
+            "url": "https:\\/\\/de209.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": false,
+            "active": "0"
+          },
+          {
+            "server_name": "de208",
+            "name": "Welt 208",
+            "rank": "462",
+            "url": "https:\\/\\/de208.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": false,
+            "active": "0"
+          },
+          {
+            "server_name": "de207",
+            "name": "Welt 207",
+            "rank": "461",
+            "url": "https:\\/\\/de207.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": false,
+            "active": "0"
+          },
+          {
+            "server_name": "de206",
+            "name": "Welt 206",
+            "rank": "460",
+            "url": "https:\\/\\/de206.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": false,
+            "active": "0"
+          },
+          {
+            "server_name": "dec2",
+            "name": "Special",
+            "rank": "459",
+            "url": "https:\\/\\/dec2.die-staemme.de",
+            "register": true,
+            "login": true,
+            "best": false,
+            "active": "0"
+          }
+        ],
+        "prereg": []
+      }
+    },
+    "world_session": null
+  }
+}

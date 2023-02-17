@@ -1,0 +1,4 @@
+databaseChangeLog:
+  - objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+  - include:
+      file: /db/changelog/changes/changelog-init.yaml

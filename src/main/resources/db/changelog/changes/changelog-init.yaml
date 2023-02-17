@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - logicalFilePath: /changes/init
+  - changeSet:
+      id: initial
+      author: juergmar
+      changes:
+        - createTable:
+            tableName: session
+            columns:
+              - column:
+                  name: id
+                  type: integer
+              - column:
+                  name: name
+                  type: varchar(255)
