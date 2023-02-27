@@ -1,17 +1,18 @@
 package de.ma.tw.app.persistence.appsession.api
 
 import de.ma.tw.core.domain.appsession.api.*
+import de.ma.tw.core.domain.appsession.api.signon.*
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 
 @Serializable
 data class SignOnResult(
-    val result: Result
+    val result: SignOnResponseImpl
 )
 
 @Serializable
-data class Result(
+data class SignOnResponseImpl(
     @SerialName("master_session")
     override val masterSession: MasterSessionImpl,
     override val type: String,

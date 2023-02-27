@@ -2,6 +2,7 @@ greeting:
   message: "hello"
 
 liquibase:
+  deactivated: true
   url: jdbc:postgresql://localhost:5432/postgres
 
 tribalwars:
@@ -18,3 +19,6 @@ quarkus:
   liquibase:
     migrate-at-start: false
     change-log: db/changelog/db.changelog-master.yaml
+  hibernate-orm:
+    database:
+      generation: update

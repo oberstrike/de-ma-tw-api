@@ -1,18 +1,19 @@
 package de.ma.tw.app.persistence.appsession.model
 
+import de.ma.tw.app.persistence.shared.AbstractBaseEntity
+import de.ma.tw.core.domain.appsession.api.signon.World
 import de.ma.tw.core.domain.appsession.model.AppSession
 import java.time.LocalDateTime
 import java.util.*
+import javax.persistence.Entity
 
-class AppSessionEntity: AppSession {
+@Entity
+class AppSessionEntity : AbstractBaseEntity() {
 
-    override val id: UUID? = null
+    var playerId: Int = 0
 
-    override val playerId: Int = 0
+    var signOnDateTime: LocalDateTime = LocalDateTime.now()
 
-    override val signOnDateTime: LocalDateTime
-        get() = TODO("Not yet implemented")
+    var token: String = ""
 
-    override val token: String
-        get() = TODO("Not yet implemented")
 }

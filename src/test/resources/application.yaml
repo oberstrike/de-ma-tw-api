@@ -1,8 +1,6 @@
 greeting:
   message: "hello"
 
-liquibase:
-  url: jdbc:postgresql://localhost:5432/postgres
 
 tribalwars:
   base-url: https://www.die-staemme.de/
@@ -10,10 +8,6 @@ tribalwars:
 quarkus:
   datasource:
     db-kind: postgresql
-    username: postgres
-    password: postgres
-    reactive:
-      url: vertx-reactive:postgresql://localhost:5432/postgres
     jdbc: false
   liquibase:
     migrate-at-start: false

@@ -11,3 +11,6 @@ pluginManagement {
     }
 }
 rootProject.name="de-ma-tw-api"
+
+
+enableFeaturePreview("VERSION_CATALOGS")

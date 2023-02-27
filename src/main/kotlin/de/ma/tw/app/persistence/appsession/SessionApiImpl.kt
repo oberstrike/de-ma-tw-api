@@ -1,12 +1,12 @@
 package de.ma.tw.app.persistence.appsession
 
+import de.ma.tw.app.persistence.appsession.api.AppSessionService
 import de.ma.tw.app.persistence.http.AppHeadersFactory
 import de.ma.tw.app.persistence.http.AppHttpClientOptions
-import de.ma.tw.app.persistence.appsession.api.AppSessionService
 import de.ma.tw.app.persistence.http.request.RequestUtils
 import de.ma.tw.core.domain.appsession.api.AppSessionApi
-import de.ma.tw.core.domain.appsession.api.SignOnForm
-import de.ma.tw.core.domain.appsession.api.SignOnResponse
+import de.ma.tw.core.domain.appsession.api.signon.SignOnForm
+import de.ma.tw.core.domain.appsession.api.signon.SignOnResponse
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.encodeToJsonElement
@@ -19,14 +19,15 @@ import javax.enterprise.context.ApplicationScoped
 @ApplicationScoped
 class AppSessionApiService(
     @ConfigProperty(name = "tribalwars.base-url")
-    private val url: String
+    private val url: String,
 ) : AppSessionApi {
 
-    private var sessionApi = RestClientBuilder.newBuilder()
+    private val sessionApi: AppSessionService = RestClientBuilder.newBuilder()
         .baseUri(URI.create(url))
         .register(AppHttpClientOptions::class.java)
-        .register(AppHeadersFactory::class)
+        .register(AppHeadersFactory::class.java)
         .build(AppSessionService::class.java)
+
 
     override suspend fun signOn(signOnForm: SignOnForm): SignOnResponse {
         val encodeToJsonElement = Json.encodeToJsonElement(
@@ -46,6 +47,7 @@ class AppSessionApiService(
             request.form,
             request.hash
         )
+
         return signOnResult.result
     }
 

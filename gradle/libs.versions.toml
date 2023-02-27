@@ -1,0 +1,29 @@
+[versions]
+kotlin = "1.7.20"
+kluentVersion = "1.72"
+kotlinFakerVersion = "1.13.4"
+mockkVersion = "1.12.1"
+kotlinCoroutinesVersion = "1.6.4"
+quarkusMockkVersion = "1.1.1"
+testcontainersVersion = "1.16.2"
+wireMockJreVersion = "2.35.0"
+wireMockKotlinVersion = "2.0.1"
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+mavenPublish = { id = "com.vanniktech.maven.publish", version = "0.24.0" }
+
+[libraries]
+kotlin-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
+kluent = { module = "org.amshove.kluent:kluent", version.ref = "kluentVersion" }
+kotlin-faker = { module = "io.github.serpro69:kotlin-faker", version.ref = "kotlinFakerVersion" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockkVersion" }
+kotlinCoroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinCoroutinesVersion" }
+kotlinCoroutinesTest = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlinCoroutinesVersion" }
+mockkQuarkus = { module = "io.quarkiverse.mockk:quarkus-junit5-mockk", version.ref = "quarkusMockkVersion" }
+testContainerTestcontainers = { module = "org.testcontainers:postgresql", version.ref = "testcontainersVersion" }
+testContainerPostgres = { module = "org.testcontainers:testcontainers", version.ref = "testcontainersVersion" }
+testContainerJunitJupiter = { module = "org.testcontainers:junit-jupiter", version.ref = "testcontainersVersion" }
+wiremockJre = {module = "com.github.tomakehurst:wiremock-jre8", version.ref = "wireMockJreVersion"}
+wireMockKotlin = {module = "com.marcinziolo:kotlin-wiremock", version.ref = "wireMockKotlinVersion"}
+

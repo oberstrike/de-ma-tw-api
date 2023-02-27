@@ -2,19 +2,12 @@ package de.ma.tw.api
 
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured.given
+import io.restassured.module.kotlin.extensions.Given
 import org.hamcrest.CoreMatchers.`is`
 import org.junit.jupiter.api.Test
 
 @QuarkusTest
 class AppSessionResourceTest {
 
-    @Test
-    fun testHelloEndpoint() {
-        given()
-          .`when`().get("/hello")
-          .then()
-             .statusCode(200)
-             .body(`is`("Hello from RESTEasy Reactive"))
-    }
 
 }

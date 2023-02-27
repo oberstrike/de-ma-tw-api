@@ -1,6 +1,6 @@
 package de.ma.tw.app.persistence.appsession
 
-import de.ma.tw.core.domain.appsession.api.SignOnForm
+import de.ma.tw.core.domain.appsession.api.signon.SignOnForm
 import kotlinx.serialization.Serializable
 
 @Serializable

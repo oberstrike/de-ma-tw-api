@@ -1,6 +1,6 @@
 package de.ma.tw.app.persistence.appsession
 
-import de.ma.tw.utils.WireMockExtensions
+import de.ma.tw.utils.http.WireMockExtensions
 import io.quarkus.test.common.QuarkusTestResource
 import io.quarkus.test.junit.QuarkusTest
 import kotlinx.coroutines.runBlocking

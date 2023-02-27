@@ -1,8 +1,10 @@
 plugins {
-    kotlin("jvm") version "1.7.22"
+    @Suppress("DSL_SCOPE_VIOLATION") // TODO: Remove once KTIJ-19369 is fixed
+    alias(libs.plugins.kotlin.jvm)
     kotlin("plugin.allopen") version "1.7.22"
     id("io.quarkus")
     kotlin("plugin.serialization") version "1.7.22"
+    id("org.jetbrains.kotlin.plugin.noarg") version "1.7.22"
 }
 
 repositories {
@@ -27,13 +29,27 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
     implementation("io.quarkus:quarkus-arc")
-    testImplementation("io.quarkus:quarkus-junit5")
-    testImplementation("io.rest-assured:rest-assured")
-    testImplementation("com.github.tomakehurst:wiremock-jre8:2.35.0")
-    testImplementation("com.marcinziolo:kotlin-wiremock:2.0.1")
     implementation("io.quarkus:quarkus-hibernate-reactive-panache-kotlin")
     implementation("io.quarkus:quarkus-jdbc-postgresql")
     implementation("io.quarkus:quarkus-reactive-pg-client")
+
+    implementation(libs.kotlinCoroutines)
+
+
+
+    testImplementation("io.quarkus:quarkus-junit5")
+    testImplementation("io.rest-assured:rest-assured")
+    testImplementation("io.rest-assured:kotlin-extensions")
+    testImplementation("io.quarkus:quarkus-panache-mock")
+    testImplementation(libs.wiremockJre)
+    testImplementation(libs.wireMockKotlin)
+    testImplementation(libs.kluent)
+    testImplementation(libs.mockk)
+    testImplementation(libs.mockkQuarkus)
+    testImplementation(libs.testContainerTestcontainers)
+    testImplementation(libs.testContainerJunitJupiter)
+    testImplementation(libs.testContainerPostgres)
+    testImplementation(libs.kotlinCoroutinesTest)
 }
 
 group = "de.ma.tw.api"
@@ -52,9 +68,18 @@ allOpen {
     annotation("javax.enterprise.context.ApplicationScoped")
     annotation("io.quarkus.test.junit.QuarkusTest")
     annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_17.toString()
     kotlinOptions.javaParameters = true
+}
+
+
+configure<org.jetbrains.kotlin.noarg.gradle.NoArgExtension> {
+    annotation("javax.persistence.Entity")
+    annotation("javax.persistence.MappedSuperclass")
+
 }

@@ -4,5 +4,6 @@ import de.ma.tw.core.domain.appsession.model.AppSession
 import java.util.*
 
 interface AppSessionGateway {
-    fun persist(appSession: AppSession): UUID
+    suspend fun persist(appSession: AppSession): UUID
+    suspend fun findById(sessionId: UUID): AppSession?
 }

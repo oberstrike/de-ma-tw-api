@@ -20,14 +20,18 @@ class InitLiquibaseService(
     @ConfigProperty(name = "quarkus.datasource.password")
     val password: String,
     @ConfigProperty(name = "quarkus.liquibase.change-log")
-    val changeLogLocation: String
+    val changeLogLocation: String,
+    @ConfigProperty(name = "liquibase.deactivated")
+    val deactivated: Boolean
 ) {
 
     private val logger = LoggerFactory.getLogger(InitLiquibaseService::class.java)
 
 
     fun onStart(@Observes ev: StartupEvent) {
-        liquibaseUpgrade()
+        if(!deactivated){
+            liquibaseUpgrade()
+        }
     }
 
     private fun liquibaseUpgrade() {

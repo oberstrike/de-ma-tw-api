@@ -1,10 +1,14 @@
 package de.ma.tw.core.impl.appsession
 
-import de.ma.tw.core.api.session.CreateAppSessionUseCase
+import de.ma.tw.core.api.appsession.CreateAppSessionUseCase
+import de.ma.tw.core.api.shared.EncryptionService
+import de.ma.tw.core.domain.account.AccountGateway
+import de.ma.tw.core.domain.account.model.Account
 import de.ma.tw.core.domain.appsession.AppSessionGateway
 import de.ma.tw.core.domain.appsession.api.AppSessionApi
-import de.ma.tw.core.domain.appsession.api.SignOnForm
-import de.ma.tw.core.domain.appsession.api.Worlds
+import de.ma.tw.core.domain.appsession.api.signon.SignOnForm
+import de.ma.tw.core.domain.appsession.api.signon.World
+import de.ma.tw.core.domain.appsession.api.signon.Worlds
 import de.ma.tw.core.domain.appsession.model.AppSession
 import de.ma.tw.core.domain.appsession.model.AppSessionCreateParams
 import de.ma.tw.core.domain.appsession.model.AppSessionCreationResult
@@ -13,7 +17,9 @@ import java.util.*
 
 class CreateAppAppSessionUseCaseImpl(
     private val appSessionApi: AppSessionApi,
-    private val appSessionGateway: AppSessionGateway
+    private val appSessionGateway: AppSessionGateway,
+    private val encryptionService: EncryptionService,
+    private val accountGateway: AccountGateway
 ) : CreateAppSessionUseCase {
 
     private data class SignOnFormImpl(
@@ -26,7 +32,8 @@ class CreateAppAppSessionUseCaseImpl(
         override val id: UUID?,
         override val token: String,
         override val playerId: Int,
-        override val signOnDateTime: LocalDateTime
+        override val signOnDateTime: LocalDateTime,
+        override val worlds: List<World>
     ) : AppSession
 
     private data class SignOnCreateResultImpl(
@@ -36,13 +43,15 @@ class CreateAppAppSessionUseCaseImpl(
         override val playerName: String
     ) : AppSessionCreationResult
 
-    override suspend fun invoke(appSessionCreateParams: AppSessionCreateParams): AppSessionCreationResult {
+    override suspend fun invoke(accountId: UUID): AppSessionCreationResult {
+
+        val account: Account? = accountGateway.findById(accountId)?: throw IllegalArgumentException("")
 
         //Create signOnForm
         val signOnForm = SignOnFormImpl(
             "login",
-            appSessionCreateParams.username,
-            appSessionCreateParams.password
+            account!!.username,
+            encryptionService.decrypt(account.password)
         )
 
         //Use the api to get the response
@@ -53,7 +62,8 @@ class CreateAppAppSessionUseCaseImpl(
             id = null,
             token = signOnResponse.masterSession.token,
             playerId = signOnResponse.playerId,
-            signOnDateTime = LocalDateTime.now()
+            signOnDateTime = LocalDateTime.now(),
+            worlds = signOnResponse.masterSession.worlds.active
         )
 
         //Persist the AppSessionModel
