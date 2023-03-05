@@ -19,7 +19,8 @@ class AppSessionGatewayImpl(
         override val signOnDateTime: LocalDateTime,
         override val playerId: Int,
         override val worlds: List<World>,
-        override val id: UUID?
+        override val id: UUID?,
+        override val accountId: UUID
     ) : AppSession
 
     override suspend fun persist(appSession: AppSession): UUID {
@@ -37,7 +38,9 @@ class AppSessionGatewayImpl(
 
     override suspend fun findById(sessionId: UUID): AppSession? {
         return this.appSessionRepository.findById(sessionId).awaitSuspending().let {
-            AppSessionImpl(it.token, it.signOnDateTime, it.playerId, emptyList(), it.id)
+            val accountEntityid = it.accountEntity!!.id!!
+
+            AppSessionImpl(it.token, it.signOnDateTime, it.playerId, emptyList(), it.id, accountEntityid)
         }
     }
 

@@ -2,12 +2,10 @@ package de.ma.tw.app.persistence.account
 
 import de.ma.tw.app.persistence.account.model.AccountEntity
 import de.ma.tw.app.persistence.account.model.AccountRepository
+import de.ma.tw.app.persistence.appsession.model.AppSessionEntity
 import de.ma.tw.core.domain.account.AccountGateway
-import de.ma.tw.core.domain.account.model.Account
-import de.ma.tw.core.domain.account.model.AccountCreate
-import de.ma.tw.core.domain.account.model.AccountCreatedResponse
-import de.ma.tw.core.domain.account.model.AccountOverview
 import de.ma.tw.app.web.shared.UUIDSerializer
+import de.ma.tw.core.domain.account.model.*
 import io.quarkus.hibernate.reactive.panache.Panache
 import io.smallrye.mutiny.coroutines.awaitSuspending
 import kotlinx.serialization.Serializable
@@ -29,7 +27,9 @@ class AccountGatewayImpl(
     @Serializable
     data class AccountImpl(
         override val username: String,
-        override val password: String
+        override val password: String,
+        @Serializable(with = UUIDSerializer::class)
+        override val appSessionId: UUID? = null
     ) : Account
 
     @Serializable
@@ -40,7 +40,7 @@ class AccountGatewayImpl(
     ) : AccountOverview
 
     override suspend fun createAccount(accountCreate: AccountCreate): AccountCreatedResponse {
-        if(existsByName(accountCreate.username)){
+        if (existsByName(accountCreate.username)) {
             throw IllegalArgumentException("An account with the name ${accountCreate.username} does already exists.")
         }
 
@@ -61,7 +61,7 @@ class AccountGatewayImpl(
     override suspend fun findById(accountId: UUID): Account? {
         val accountEntity: AccountEntity = accountRepository.findById(accountId).awaitSuspending() ?: return null
 
-        return AccountImpl(accountEntity.username, accountEntity.password)
+        return AccountImpl(accountEntity.username, accountEntity.password, accountEntity.appSessionEntity?.id)
 
     }
 
@@ -83,7 +83,22 @@ class AccountGatewayImpl(
     }
 
     override suspend fun existsByName(username: String): Boolean {
-        return accountRepository.find("username", username).count().awaitSuspending() != 0L
+        return accountRepository.count("username = ?1", username).awaitSuspending() != 0L
 
+    }
+
+    override suspend fun update(accountId: UUID, accountUpdate: AccountUpdate) {
+        val accountEntity = accountRepository.findById(accountId).awaitSuspending()
+
+        accountEntity.appSessionEntity = AppSessionEntity().apply {
+            this.id = accountUpdate.appSessionId
+            this.accountEntity = accountEntity
+        }
+
+        val result = Panache.withTransaction {
+            accountRepository.persist(accountEntity)
+        }.awaitSuspending()
+
+        println(result.appSessionEntity)
     }
 }

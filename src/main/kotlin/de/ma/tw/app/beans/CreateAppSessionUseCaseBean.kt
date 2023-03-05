@@ -5,7 +5,7 @@ import de.ma.tw.core.api.shared.EncryptionService
 import de.ma.tw.core.domain.account.AccountGateway
 import de.ma.tw.core.domain.appsession.AppSessionGateway
 import de.ma.tw.core.domain.appsession.api.AppSessionApi
-import de.ma.tw.core.impl.appsession.CreateAppAppSessionUseCaseImpl
+import de.ma.tw.core.impl.appsession.CreateAppSessionUseCaseImpl
 import javax.enterprise.context.ApplicationScoped
 
 
@@ -15,7 +15,7 @@ class CreateAppSessionUseCaseBean(
     appSessionGateway: AppSessionGateway,
     encryptionService: EncryptionService,
     accountGateway: AccountGateway
-) : CreateAppSessionUseCase by CreateAppAppSessionUseCaseImpl(
+) : CreateAppSessionUseCase by CreateAppSessionUseCaseImpl(
     appSessionApi = appSessionApi,
     appSessionGateway = appSessionGateway,
     encryptionService = encryptionService,

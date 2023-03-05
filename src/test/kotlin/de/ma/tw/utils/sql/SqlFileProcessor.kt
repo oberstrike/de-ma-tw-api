@@ -15,7 +15,7 @@ object SqlFileProcessor {
 
     private val logger = Logger.getLogger(SqlFileProcessor::class.simpleName)
 
-    suspend fun processTargetFile(targetFile: String) = withContext(Dispatchers.IO) {
+    fun processTargetFile(targetFile: String) {
         logger.info("Processing file: $targetFile")
 
         val pgPool = getPgPool()

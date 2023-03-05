@@ -2,18 +2,20 @@ package de.ma.tw.utils.sql
 
 import de.ma.tw.app.web.utils.TestScenario
 import io.quarkus.test.junit.callback.QuarkusTestAfterEachCallback
+import io.quarkus.test.junit.callback.QuarkusTestAfterTestExecutionCallback
 import io.quarkus.test.junit.callback.QuarkusTestMethodContext
 import io.vertx.pgclient.PgPool
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
+import java.util.logging.Logger
 import javax.enterprise.inject.spi.CDI
 
-class SqlQuarkusTestAfterEachCallback : QuarkusTestAfterEachCallback {
+class SqlQuarkusTestAfterEachCallback : QuarkusTestAfterTestExecutionCallback {
 
 
-    override fun afterEach(context: QuarkusTestMethodContext) = runBlocking(
-        Dispatchers.IO
-    ) {
+    override fun afterTestExecution(context: QuarkusTestMethodContext) {
+
         //get the package of the context.testInstance
         var packageName = context.testInstance::class.qualifiedName!!.substringBeforeLast('.')
 
@@ -27,32 +29,19 @@ class SqlQuarkusTestAfterEachCallback : QuarkusTestAfterEachCallback {
             for (sqlAnnotation in sqlAnnotations) {
                 val targetFiles = sqlAnnotation.after
                 for (targetFile in targetFiles) {
+                    logger.info("Proccessing file: $targetFile in After Each.")
                     //put the package name add the target file name
                     SqlFileProcessor.processTargetFile("$packageName/$targetFile")
                 }
             }
-            //clear the database
-            val pgPool = CDI.current().select(PgPool::class.java).get()
-            pgPool.query(CLEAR_DATABASE_SCRIPT).execute().result()
-        }
-
-
-        if(testScenarios.isNotEmpty() || sqlAnnotations.isNotEmpty()){
-            val pgPool = CDI.current().select(PgPool::class.java).get()
-            pgPool.query(CLEAR_DATABASE_SCRIPT).execute().result()
         }
 
     }
 
     companion object {
-        private const val CLEAR_DATABASE_SCRIPT = "DO \$\$ DECLARE\n" +
-                "  r RECORD;\n" +
-                "BEGIN\n" +
-                "  -- Get all tables in the current schema\n" +
-                "  FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = current_schema()) LOOP\n" +
-                "    EXECUTE 'DELETE FROM ' || quote_ident(r.tablename) || ';';\n" +
-                "  END LOOP;\n" +
-                "END \$\$;"
+
+        private val logger = LoggerFactory.getLogger(SqlQuarkusTestAfterEachCallback::class.java)
+
     }
 
 }

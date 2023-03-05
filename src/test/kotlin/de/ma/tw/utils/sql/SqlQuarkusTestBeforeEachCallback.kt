@@ -3,19 +3,28 @@ package de.ma.tw.utils.sql
 import de.ma.tw.app.web.utils.TestScenario
 import de.ma.tw.utils.sql.SqlFileProcessor.processTargetFile
 import io.quarkus.test.junit.callback.QuarkusTestBeforeEachCallback
+import io.quarkus.test.junit.callback.QuarkusTestBeforeTestExecutionCallback
 import io.quarkus.test.junit.callback.QuarkusTestMethodContext
+import io.vertx.pgclient.PgPool
+import io.vertx.sqlclient.Tuple
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
+import javax.enterprise.inject.spi.CDI
 import kotlin.reflect.full.createInstance
 
-class SqlQuarkusTestBeforeEachCallback : QuarkusTestBeforeEachCallback {
+class SqlQuarkusTestBeforeEachCallback : QuarkusTestBeforeTestExecutionCallback {
 
     private lateinit var packageName: String
 
+    companion object {
 
-    override fun beforeEach(context: QuarkusTestMethodContext) = runBlocking(
-        Dispatchers.IO
-    ) {
+        private val logger = LoggerFactory.getLogger(SqlQuarkusTestBeforeEachCallback::class.java)
+
+    }
+
+
+    override fun beforeTestExecution(context: QuarkusTestMethodContext) {
         packageName = "/${
             context.testInstance::class.qualifiedName!!
                 .substringBeforeLast(".")
@@ -26,7 +35,8 @@ class SqlQuarkusTestBeforeEachCallback : QuarkusTestBeforeEachCallback {
         testScenarioHandler(context)
     }
 
-    private suspend fun sqlHandler(context: QuarkusTestMethodContext) {
+
+    private fun sqlHandler(context: QuarkusTestMethodContext) {
         context.testMethod.getAnnotationsByType(Sql::class.java)
             .flatMap { it.before.toList() }
             .map { targetFile -> "$packageName/$targetFile" }
@@ -35,9 +45,9 @@ class SqlQuarkusTestBeforeEachCallback : QuarkusTestBeforeEachCallback {
     }
 
 
-    private suspend fun testScenarioHandler(context: QuarkusTestMethodContext) {
+    private fun testScenarioHandler(context: QuarkusTestMethodContext) {
         val testScenarios = context.testMethod.getAnnotationsByType(TestScenario::class.java)
-        if(testScenarios.isEmpty()){
+        if (testScenarios.isEmpty()) {
             return
         }
 
@@ -53,6 +63,7 @@ class SqlQuarkusTestBeforeEachCallback : QuarkusTestBeforeEachCallback {
         scenario.before()
             .map { targetFile -> "$packageName/$targetFile" }
             .forEach { targetFile -> processTargetFile(targetFile) }
+
     }
 
 

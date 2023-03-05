@@ -6,6 +6,7 @@ import java.util.*
 
 interface AppSession {
     val id: UUID?
+    val accountId: UUID
     val playerId: Int
     val token: String
     val signOnDateTime: LocalDateTime

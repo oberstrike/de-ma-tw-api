@@ -1,28 +1,38 @@
 package de.ma.tw.app.persistence.account
 
+import de.ma.tw.app.persistence.account.model.AccountEntity
 import de.ma.tw.app.persistence.account.model.AccountRepository
+import de.ma.tw.app.persistence.appsession.model.AppSessionEntity
+import de.ma.tw.app.persistence.appsession.model.AppSessionRepository
 import de.ma.tw.app.web.apis.AccountResource
 import de.ma.tw.app.web.utils.TestScenario
+import de.ma.tw.core.domain.account.model.AccountUpdate
 import de.ma.tw.utils.database.DatabaseTestResource
+import de.ma.tw.utils.sql.AbstractGatewayTest
+import de.ma.tw.utils.sql.Sql
+import io.quarkus.hibernate.reactive.panache.Panache
+import io.quarkus.test.TestTransaction
 import io.quarkus.test.common.QuarkusTestResource
 import io.quarkus.test.junit.QuarkusTest
 import io.smallrye.mutiny.coroutines.awaitSuspending
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.amshove.kluent.*
 import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.params.ParameterizedTest
 import java.lang.IllegalArgumentException
+import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 
 
 @QuarkusTest
 @QuarkusTestResource(DatabaseTestResource::class)
-class AccountGatewayImplTest {
+class AccountGatewayImplTest : AbstractGatewayTest() {
 
     @Inject
     private lateinit var accountGatewayImpl: AccountGatewayImpl
@@ -30,32 +40,40 @@ class AccountGatewayImplTest {
     @Inject
     private lateinit var accountRepository: AccountRepository
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @ParameterizedTest
-    @TestScenario(scenario = OneAccountTestScenario::class)
-    fun createAccountNegativeTest(scenario: OneAccountTestScenario) = runTest {
-        val username = scenario.account.username
-        val password = "test"
+    @Inject
+    private lateinit var appSessionRepository: AppSessionRepository
 
-        val accountCreate = AccountResource.AccountCreateImpl(
-            username,
-            password
-        )
 
-        assertThrows(
-            IllegalArgumentException::class.java
-        ) {
-            runBlocking {
-                accountGatewayImpl.createAccount(accountCreate)
+    @Test
+    fun createAccountNegativeTest() {
+
+        runLocalTest(OneAccountTestScenario) { scenario ->
+            val username = scenario.account.username
+            val password = "test"
+
+            val accountCreate = AccountResource.AccountCreateImpl(
+                username,
+                password
+            )
+
+            assertThrows(
+                IllegalArgumentException::class.java
+            ) {
+                runBlocking {
+                    accountGatewayImpl.createAccount(accountCreate)
+                }
             }
         }
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     @Test
-    fun createAccountTest() = runTest {
+    fun createAccountTest() = runLocalTest {
         val username = "test"
         val password = "test"
+
+        val accountEntities = accountRepository.findAll().list<AccountEntity>().awaitSuspending()
+        println("Count before ${accountEntities.map { it.username }}")
 
         val accountCreate = AccountResource.AccountCreateImpl(
             username,
@@ -72,10 +90,9 @@ class AccountGatewayImplTest {
         assertEquals(1, count)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @ParameterizedTest
-    @TestScenario(scenario = OneAccountTestScenario::class)
-    fun findByIdTest(scenario: OneAccountTestScenario) = runTest {
+
+    @Test
+    fun findByIdTest() = runLocalTest(OneAccountTestScenario) { scenario ->
 
         val result = accountGatewayImpl.findById(scenario.account.id)
 
@@ -85,10 +102,9 @@ class AccountGatewayImplTest {
 
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @ParameterizedTest
-    @TestScenario(scenario = OneAccountTestScenario::class)
-    fun findAllTest(scenario: OneAccountTestScenario) = runTest {
+
+    @Test
+    fun findAllTest() = runLocalTest(OneAccountTestScenario) { scenario ->
 
         val result = accountGatewayImpl.findAll()
 
@@ -100,10 +116,9 @@ class AccountGatewayImplTest {
         accountOverview.username `should be equal to` scenario.account.username
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @ParameterizedTest
-    @TestScenario(scenario = OneAccountTestScenario::class)
-    fun deleteByIdTest(scenario: OneAccountTestScenario) = runTest {
+
+    @Test
+    fun deleteByIdTest() = runLocalTest(OneAccountTestScenario) { scenario ->
 
         accountRepository.count().awaitSuspending() `should be equal to` 1
 
@@ -112,9 +127,9 @@ class AccountGatewayImplTest {
         accountRepository.count().awaitSuspending() `should be equal to` 0
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     @Test
-    fun deleteByIdNegativeTest() = runTest {
+    fun deleteByIdNegativeTest() = runLocalTest {
 
         assertThrows(
             IllegalArgumentException::class.java
@@ -128,11 +143,8 @@ class AccountGatewayImplTest {
     }
 
 
-
-    @OptIn(ExperimentalCoroutinesApi::class)
-    @ParameterizedTest
-    @TestScenario(scenario = OneAccountTestScenario::class)
-    fun existsByNameTest(scenario: OneAccountTestScenario) = runTest {
+    @Test
+    fun existsByNameTest() = runLocalTest(OneAccountTestScenario) { scenario ->
 
         val existsByName = accountGatewayImpl.existsByName(scenario.account.username)
 
@@ -142,4 +154,34 @@ class AccountGatewayImplTest {
 
         doesntExistByName `should be equal to` false
     }
+
+
+    @Test
+    fun updateTest() = runLocalTest(OneAccountTestScenario) { scenario ->
+        val accountId = scenario.account.id
+        val appSessionEntity = Panache.withTransaction {
+            appSessionRepository.persist(AppSessionEntity().apply {
+                this.playerId = 1
+                this.token = "token"
+                this.signOnDateTime = LocalDateTime.now()
+                this.accountEntity = AccountEntity().apply {
+                    this.id = accountId
+                }
+            })
+        }.awaitSuspending()
+
+        accountGatewayImpl.update(
+            accountId,
+            object : AccountUpdate {
+                override val appSessionId: UUID = appSessionEntity.id!!
+            }
+        )
+
+
+        val result = accountRepository.findById(accountId).awaitSuspending()
+        result.appSessionEntity shouldNotBe null
+        result.appSessionEntity!!.id `should be equal to` appSessionEntity.id
+        result.appSessionEntity!!.accountEntity!!.id `should be equal to` accountId
+    }
+
 }
